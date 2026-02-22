@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { Calendar, Clock, User, Horse } from 'lucide-react';
-import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parseISO, startOfWeek, getDay } from 'date-fns';
+import { Calendar, Clock, User, Zap } from 'lucide-react';
+import { Calendar as BigCalendar } from 'react-big-calendar';
+import { dateFnsLocalizer } from 'react-big-calendar';
+import { format, parseISO, startOfWeek, getDay, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
@@ -52,7 +53,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadAgenda();
-  }, []);
+  }, [date]);
 
   const loadAgenda = async () => {
     try {
@@ -91,21 +92,27 @@ export default function DashboardPage() {
 
   const eventStyleGetter = (event: any) => {
     const clase = event.resource;
-    let backgroundColor = '#22c55e'; // Verde por defecto
+    let backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    let borderColor = 'rgba(255, 255, 255, 0.3)';
 
     if (clase.estado === 'completada') {
-      backgroundColor = '#6b7280'; // Gris
+      backgroundColor = 'rgba(255, 255, 255, 0.5)';
+      borderColor = 'rgba(255, 255, 255, 0.2)';
     } else if (clase.estado === 'cancelada') {
-      backgroundColor = '#ef4444'; // Rojo
+      backgroundColor = 'rgba(220, 38, 38, 0.8)';
+      borderColor = 'rgba(220, 38, 38, 0.5)';
     }
 
     return {
       style: {
         backgroundColor,
-        borderRadius: '4px',
+        borderColor,
+        borderRadius: '6px',
         border: 'none',
-        color: 'white',
-        padding: '2px 4px',
+        color: clase.estado === 'cancelada' ? '#ffffff' : '#0a0a0a',
+        padding: '4px 6px',
+        fontSize: '12px',
+        fontWeight: 500,
       },
     };
   };
@@ -114,7 +121,7 @@ export default function DashboardPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/30 border-t-white"></div>
         </div>
       </Layout>
     );
@@ -123,38 +130,38 @@ export default function DashboardPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Agenda General</h1>
-            <p className="text-gray-600 mt-1">Vista completa de todas las clases programadas</p>
+            <h1 className="font-serif text-3xl font-medium text-white">Agenda General</h1>
+            <p className="text-white/60 mt-1">Vista completa de todas las clases programadas</p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <button
               onClick={() => setView('month')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
                 view === 'month'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300'
+                  ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
               }`}
             >
               Mes
             </button>
             <button
               onClick={() => setView('week')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
                 view === 'week'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300'
+                  ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
               }`}
             >
               Semana
             </button>
             <button
               onClick={() => setView('day')}
-              className={`px-4 py-2 rounded-lg ${
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
                 view === 'day'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300'
+                  ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
+                  : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
               }`}
             >
               Día
@@ -162,7 +169,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 overflow-hidden">
           <BigCalendar
             localizer={localizer}
             events={events}
@@ -185,27 +192,26 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Lista de clases */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Clases del Mes</h2>
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-white/10">
+            <h2 className="font-serif text-xl font-medium text-white">Clases del Mes</h2>
           </div>
           <div className="p-6">
-            <div className="space-y-4">
+            <div className="space-y-3">
               {clases.slice(0, 10).map((clase) => (
                 <div
                   key={clase.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors backdrop-blur-sm"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span className="font-semibold text-gray-900">
+                        <Calendar className="w-4 h-4 text-white/50" />
+                        <span className="font-medium text-white">
                           {format(parseISO(clase.fecha), 'EEEE, dd MMMM', { locale: es })}
                         </span>
                       </div>
-                      <div className="space-y-1 text-sm text-gray-600">
+                      <div className="space-y-1 text-sm text-white/60">
                         <div className="flex items-center space-x-2">
                           <Clock className="w-4 h-4" />
                           <span>
@@ -219,18 +225,18 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Horse className="w-4 h-4" />
+                          <Zap className="w-4 h-4" />
                           <span>{clase.caballos.nombre}</span>
                         </div>
                       </div>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded text-xs font-medium ${
+                      className={`px-3 py-1 rounded-lg text-xs font-medium ${
                         clase.estado === 'programada'
-                          ? 'bg-green-100 text-green-800'
+                          ? 'bg-white/10 text-white border border-white/20'
                           : clase.estado === 'completada'
-                          ? 'bg-gray-100 text-gray-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-white/5 text-white/60 border border-white/10'
+                          : 'bg-red-500/20 text-red-400 border border-red-500/20'
                       }`}
                     >
                       {clase.estado}

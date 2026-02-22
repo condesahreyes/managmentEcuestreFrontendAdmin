@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { Package, Plus, Edit } from 'lucide-react';
+import { Package, Plus, Edit, X } from 'lucide-react';
 
 interface Plan {
   id: string;
@@ -73,7 +73,7 @@ export default function PlanesPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/30 border-t-white"></div>
         </div>
       </Layout>
     );
@@ -84,8 +84,8 @@ export default function PlanesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Planes</h1>
-            <p className="text-gray-600 mt-1">Gestiona los planes de suscripción</p>
+            <h1 className="font-serif text-3xl font-medium text-white">Planes</h1>
+            <p className="text-white/60 mt-1">Gestiona los planes de suscripción</p>
           </div>
           <button
             onClick={() => {
@@ -93,7 +93,7 @@ export default function PlanesPage() {
               setFormData({ nombre: '', tipo: 'escuelita', clases_mes: 4, precio: 0 });
               setMostrarFormulario(true);
             }}
-            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-xl hover:bg-white/90 transition-all font-semibold shadow-lg shadow-white/10"
           >
             <Plus className="w-5 h-5" />
             <span>Nuevo Plan</span>
@@ -101,13 +101,24 @@ export default function PlanesPage() {
         </div>
 
         {mostrarFormulario && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {planEditando ? 'Editar Plan' : 'Nuevo Plan'}
-            </h2>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-serif text-xl font-medium text-white">
+                {planEditando ? 'Editar Plan' : 'Nuevo Plan'}
+              </h2>
+              <button
+                onClick={() => {
+                  setMostrarFormulario(false);
+                  setPlanEditando(null);
+                }}
+                className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+              >
+                <X className="w-4 h-4 text-white/70" />
+              </button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   Nombre
                 </label>
                 <input
@@ -115,27 +126,27 @@ export default function PlanesPage() {
                   required
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/70 mb-2">
                   Tipo
                 </label>
                 <select
                   required
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                 >
-                  <option value="escuelita">Escuelita</option>
-                  <option value="pension_completa">Pensión Completa</option>
-                  <option value="media_pension">Media Pensión</option>
+                  <option value="escuelita" className="bg-[#1a1a1a]">Escuelita</option>
+                  <option value="pension_completa" className="bg-[#1a1a1a]">Pensión Completa</option>
+                  <option value="media_pension" className="bg-[#1a1a1a]">Media Pensión</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-2">
                     Clases por Mes
                   </label>
                   <input
@@ -146,11 +157,11 @@ export default function PlanesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, clases_mes: parseInt(e.target.value) })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-white/70 mb-2">
                     Precio
                   </label>
                   <input
@@ -162,14 +173,14 @@ export default function PlanesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, precio: parseFloat(e.target.value) })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                   />
                 </div>
               </div>
               <div className="flex space-x-3">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="flex-1 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-xl hover:bg-white/90 transition-all font-semibold shadow-lg shadow-white/10"
                 >
                   {planEditando ? 'Actualizar' : 'Crear'}
                 </button>
@@ -179,7 +190,7 @@ export default function PlanesPage() {
                     setMostrarFormulario(false);
                     setPlanEditando(null);
                   }}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 text-white/70 rounded-xl hover:bg-white/10 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -188,39 +199,39 @@ export default function PlanesPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {planes.map((plan) => (
             <div
               key={plan.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                    <Package className="w-6 h-6 text-primary-600" />
+                  <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
+                    <Package className="w-6 h-6 text-white/80" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{plan.nombre}</h3>
-                    <p className="text-sm text-gray-600 capitalize">
+                    <h3 className="font-medium text-white">{plan.nombre}</h3>
+                    <p className="text-sm text-white/50 capitalize">
                       {plan.tipo.replace('_', ' ')}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleEditar(plan)}
-                  className="p-2 text-gray-400 hover:text-gray-600"
+                  className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <Edit className="w-5 h-5" />
                 </button>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Clases:</span>
-                  <span className="font-semibold text-gray-900">{plan.clases_mes}/mes</span>
+                  <span className="text-white/60">Clases:</span>
+                  <span className="font-medium text-white">{plan.clases_mes}/mes</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Precio:</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-white/60">Precio:</span>
+                  <span className="font-medium text-white">
                     ${plan.precio.toFixed(2)}
                   </span>
                 </div>

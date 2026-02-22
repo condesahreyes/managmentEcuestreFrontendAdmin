@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { BarChart3, TrendingUp, Users, Horse } from 'lucide-react';
+import { BarChart3, TrendingUp, Users } from 'lucide-react';
+import Logo from '@/components/Logo';
 import {
   BarChart,
   Bar,
@@ -58,7 +59,7 @@ export default function EstadisticasPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/30 border-t-white"></div>
         </div>
       </Layout>
     );
@@ -68,50 +69,61 @@ export default function EstadisticasPage() {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Estadísticas</h1>
-          <p className="text-gray-600 mt-1">Análisis de ocupación y rendimiento</p>
+          <h1 className="font-serif text-3xl font-medium text-white">Estadísticas</h1>
+          <p className="text-white/60 mt-1">Análisis de ocupación y rendimiento</p>
         </div>
 
-        {/* Ocupación por Caballos */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <Horse className="w-6 h-6 text-primary-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Ocupación por Caballo</h2>
+            <Logo className="w-6 h-6 text-white" />
+            <h2 className="font-serif text-xl font-medium text-white">Ocupación por Caballo</h2>
           </div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={ocupacionCaballos}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="nombre" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="clases_programadas" fill="#22c55e" name="Clases Programadas" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="nombre" stroke="rgba(255,255,255,0.4)" />
+              <YAxis stroke="rgba(255,255,255,0.4)" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#111111',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                }}
+              />
+              <Legend wrapperStyle={{ color: '#ffffff' }} />
+              <Bar dataKey="clases_programadas" fill="rgba(255,255,255,0.9)" name="Clases Programadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Ocupación por Profesores */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
           <div className="flex items-center space-x-3 mb-6">
-            <Users className="w-6 h-6 text-primary-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Ocupación por Profesor</h2>
+            <Users className="w-6 h-6 text-white" />
+            <h2 className="font-serif text-xl font-medium text-white">Ocupación por Profesor</h2>
           </div>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={ocupacionProfesores}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="nombre" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="clases_programadas" fill="#3b82f6" name="Clases Programadas" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <XAxis dataKey="nombre" stroke="rgba(255,255,255,0.4)" />
+              <YAxis stroke="rgba(255,255,255,0.4)" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#111111',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                }}
+              />
+              <Legend wrapperStyle={{ color: '#ffffff' }} />
+              <Bar dataKey="clases_programadas" fill="rgba(255,255,255,0.7)" name="Clases Programadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Caballos</h3>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <h3 className="font-serif text-lg font-medium text-white mb-4">Top 5 Caballos</h3>
             <div className="space-y-3">
               {ocupacionCaballos
                 .sort((a, b) => b.clases_programadas - a.clases_programadas)
@@ -119,19 +131,19 @@ export default function EstadisticasPage() {
                 .map((caballo, index) => (
                   <div key={caballo.caballo_id} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className="w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-xs font-semibold">
+                      <span className="w-6 h-6 bg-white/10 text-white rounded-full flex items-center justify-center text-xs font-semibold border border-white/20">
                         {index + 1}
                       </span>
-                      <span className="font-medium text-gray-900">{caballo.nombre}</span>
+                      <span className="font-medium text-white">{caballo.nombre}</span>
                     </div>
-                    <span className="text-gray-600">{caballo.clases_programadas} clases</span>
+                    <span className="text-white/60">{caballo.clases_programadas} clases</span>
                   </div>
                 ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Profesores</h3>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            <h3 className="font-serif text-lg font-medium text-white mb-4">Top 5 Profesores</h3>
             <div className="space-y-3">
               {ocupacionProfesores
                 .sort((a, b) => b.clases_programadas - a.clases_programadas)
@@ -139,12 +151,12 @@ export default function EstadisticasPage() {
                 .map((profesor, index) => (
                   <div key={profesor.profesor_id} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-semibold">
+                      <span className="w-6 h-6 bg-white/10 text-white rounded-full flex items-center justify-center text-xs font-semibold border border-white/20">
                         {index + 1}
                       </span>
-                      <span className="font-medium text-gray-900">{profesor.nombre}</span>
+                      <span className="font-medium text-white">{profesor.nombre}</span>
                     </div>
-                    <span className="text-gray-600">{profesor.clases_programadas} clases</span>
+                    <span className="text-white/60">{profesor.clases_programadas} clases</span>
                   </div>
                 ))}
             </div>
