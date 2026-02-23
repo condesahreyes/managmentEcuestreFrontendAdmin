@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { CheckCircle, XCircle, AlertCircle, Plus, Edit, Trash2, X, User } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Plus, Edit, Trash2, X, User, Eye } from 'lucide-react';
 import Logo from '@/components/Logo';
 
 interface Caballo {
@@ -42,6 +42,7 @@ export default function CaballosPage() {
     limite_clases_dia: 3,
     dueno_id: '',
   });
+  const [caballoDetalle, setCaballoDetalle] = useState<Caballo | null>(null);
 
   useEffect(() => {
     loadCaballos();
@@ -119,6 +120,10 @@ export default function CaballosPage() {
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error al cambiar estado');
     }
+  };
+
+  const handleVerDetalle = (caballo: Caballo) => {
+    setCaballoDetalle(caballo);
   };
 
   const getEstadoColor = (estado: string) => {
@@ -390,6 +395,13 @@ export default function CaballosPage() {
                   </div>
                   <div className="flex gap-2 pt-2">
                     <button
+                      onClick={() => handleVerDetalle(caballo)}
+                      className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 bg-white/5 border border-white/10 text-white/70 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="text-xs">Ver</span>
+                    </button>
+                    <button
                       onClick={() => handleEditar(caballo)}
                       className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 bg-white/5 border border-white/10 text-white/70 rounded-lg hover:bg-white/10 transition-colors"
                     >
@@ -409,6 +421,160 @@ export default function CaballosPage() {
             );
           })}
         </div>
+
+        {/* Modal de Detalles del Caballo */}
+        {caballoDetalle && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4 md:mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
+                    <Logo className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-xl md:text-2xl font-medium text-white">
+                      {caballoDetalle.nombre}
+                    </h2>
+                    <p className="text-white/60 mt-1 text-sm">Detalles del Caballo</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCaballoDetalle(null)}
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                >
+                  <X className="w-4 h-4 text-white/70" />
+                </button>
+              </div>
+
+              <div className="space-y-4 md:space-y-6">
+                {/* Información General */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
+                  <h3 className="font-medium text-white mb-3 md:mb-4">Información General</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">Nombre</p>
+                      <p className="text-white text-sm md:text-base">{caballoDetalle.nombre}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">Tipo</p>
+                      <span className="inline-block px-2.5 py-1 text-xs font-medium rounded-lg bg-white/10 text-white border border-white/20">
+                        {caballoDetalle.tipo === 'escuela' ? 'Escuela' : 'Privado'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">Estado</p>
+                      <span
+                        className={`inline-block px-2.5 py-1 text-xs font-medium rounded-lg border ${
+                          getEstadoColor(caballoDetalle.estado).bg
+                        } ${getEstadoColor(caballoDetalle.estado).text} ${
+                          getEstadoColor(caballoDetalle.estado).border
+                        }`}
+                      >
+                        {caballoDetalle.estado}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">Límite de Clases por Día</p>
+                      <p className="text-white text-sm md:text-base">
+                        {caballoDetalle.limite_clases_dia} clases
+                      </p>
+                    </div>
+                    {caballoDetalle.tipo === 'privado' && caballoDetalle.dueno && (
+                      <div className="md:col-span-2">
+                        <p className="text-xs font-medium text-white/50 mb-1 flex items-center space-x-1">
+                          <User className="w-3 h-3" />
+                          <span>Dueño</span>
+                        </p>
+                        <div className="mt-1">
+                          <p className="text-white text-sm md:text-base">
+                            {caballoDetalle.dueno.nombre} {caballoDetalle.dueno.apellido}
+                          </p>
+                          <p className="text-white/60 text-xs mt-0.5">{caballoDetalle.dueno.email}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Cambiar Estado */}
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 md:p-5">
+                  <h3 className="font-medium text-white mb-3 md:mb-4">Cambiar Estado</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => {
+                        handleCambiarEstado(caballoDetalle.id, 'activo');
+                        setCaballoDetalle({ ...caballoDetalle, estado: 'activo' });
+                      }}
+                      className={`px-3 py-2 text-xs rounded-lg transition-all ${
+                        caballoDetalle.estado === 'activo'
+                          ? 'bg-white text-[#0a0a0a] font-semibold shadow-lg shadow-white/10'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                      }`}
+                    >
+                      Activo
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleCambiarEstado(caballoDetalle.id, 'descanso');
+                        setCaballoDetalle({ ...caballoDetalle, estado: 'descanso' });
+                      }}
+                      className={`px-3 py-2 text-xs rounded-lg transition-all ${
+                        caballoDetalle.estado === 'descanso'
+                          ? 'bg-white/20 text-white font-semibold border border-white/30'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                      }`}
+                    >
+                      Descanso
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleCambiarEstado(caballoDetalle.id, 'lesionado');
+                        setCaballoDetalle({ ...caballoDetalle, estado: 'lesionado' });
+                      }}
+                      className={`px-3 py-2 text-xs rounded-lg transition-all ${
+                        caballoDetalle.estado === 'lesionado'
+                          ? 'bg-red-500/30 text-red-400 font-semibold border border-red-500/30'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
+                      }`}
+                    >
+                      Lesionado
+                    </button>
+                  </div>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-white/10">
+                  <button
+                    onClick={() => {
+                      setCaballoDetalle(null);
+                      handleEditar(caballoDetalle);
+                    }}
+                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/10 text-white hover:bg-white/20 border border-white/20 rounded-xl transition-all"
+                  >
+                    <Edit className="w-4 h-4" />
+                    <span>Editar Caballo</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCaballoDetalle(null);
+                      handleEliminar(caballoDetalle.id);
+                    }}
+                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Eliminar</span>
+                  </button>
+                  <button
+                    onClick={() => setCaballoDetalle(null)}
+                    className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 text-white/70 rounded-xl hover:bg-white/10 transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { Package, Plus, Edit, X } from 'lucide-react';
+import { Package, Plus, Edit, X, Trash2 } from 'lucide-react';
 
 interface Plan {
   id: string;
@@ -67,6 +67,18 @@ export default function PlanesPage() {
       precio: plan.precio,
     });
     setMostrarFormulario(true);
+  };
+
+  const handleEliminar = async (id: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este plan? No se puede eliminar si tiene suscripciones activas.')) return;
+
+    try {
+      await api.delete(`/admin/planes/${id}`);
+      loadPlanes();
+      alert('Plan eliminado exitosamente');
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Error al eliminar plan');
+    }
   };
 
   if (loading) {
@@ -217,12 +229,22 @@ export default function PlanesPage() {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleEditar(plan)}
-                  className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <Edit className="w-5 h-5" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleEditar(plan)}
+                    className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    title="Editar plan"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleEliminar(plan.id)}
+                    className="p-2 text-red-400/50 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Eliminar plan"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">

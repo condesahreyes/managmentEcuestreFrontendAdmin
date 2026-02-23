@@ -37,20 +37,34 @@ export default function ComprobantesPage() {
   const [filtroEstado, setFiltroEstado] = useState<'pendiente' | 'todos'>('pendiente');
   const [procesando, setProcesando] = useState<string | null>(null);
   const [observaciones, setObservaciones] = useState<{ [key: string]: string }>({});
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     loadComprobantes();
-  }, [filtroEstado]);
+  }, [filtroEstado, pagina]);
 
   const loadComprobantes = async () => {
     try {
-      if (filtroEstado === 'pendiente') {
-        const { data } = await api.get('/comprobantes/pendientes');
-        setComprobantes(data || []);
+      setLoading(true);
+      const { data } = await api.get('/comprobantes/pendientes', {
+        params: {
+          page: pagina,
+          limit: 20,
+          estado: filtroEstado === 'pendiente' ? 'pendiente' : 'todos',
+        },
+      });
+
+      if (data?.comprobantes) {
+        setComprobantes(data.comprobantes);
+        setTotalPaginas(data.paginacion?.totalPaginas || 1);
+        setTotal(data.paginacion?.total || 0);
       } else {
-        // Cargar todos los comprobantes (necesitarías crear este endpoint)
-        const { data } = await api.get('/comprobantes/pendientes');
+        // Fallback para compatibilidad con respuesta antigua
         setComprobantes(data || []);
+        setTotalPaginas(1);
+        setTotal(data?.length || 0);
       }
     } catch (error) {
       console.error('Error al cargar comprobantes:', error);
@@ -167,64 +181,68 @@ export default function ComprobantesPage() {
           {comprobantes.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-white/30 mx-auto mb-4" />
-              <p className="text-white/60 text-lg mb-2">No hay comprobantes pendientes</p>
+              <p className="text-white/60 text-lg mb-2">No hay comprobantes {filtroEstado === 'pendiente' ? 'pendientes' : ''}</p>
               <p className="text-white/40 text-sm">
                 Los alumnos subirán sus comprobantes aquí para revisión
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {comprobantes.map((comprobante) => (
-                <div
-                  key={comprobante.id}
-                  className="border border-white/10 rounded-xl p-6 bg-white/5 backdrop-blur-sm"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-                          <User className="w-5 h-5 text-white/70" />
+            <>
+              <div className="mb-4 text-sm text-white/60">
+                Mostrando {comprobantes.length} de {total} comprobantes
+              </div>
+              <div className="space-y-4">
+                {comprobantes.map((comprobante) => (
+                  <div
+                    key={comprobante.id}
+                    className="border border-white/10 rounded-xl p-4 md:p-6 bg-white/5 backdrop-blur-sm"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+                            <User className="w-5 h-5 text-white/70" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-white truncate">
+                              {comprobante.users.nombre} {comprobante.users.apellido}
+                            </h3>
+                            <p className="text-sm text-white/50 truncate">{comprobante.users.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium text-white">
-                            {comprobante.users.nombre} {comprobante.users.apellido}
-                          </h3>
-                          <p className="text-sm text-white/50">{comprobante.users.email}</p>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Calendar className="w-4 h-4 text-white/50" />
-                          <span className="text-white/70">
-                            Mes:{' '}
-                            {format(
-                              new Date(comprobante.facturas.año, comprobante.facturas.mes - 1, 1),
-                              'MMMM yyyy',
-                              { locale: es }
-                            )}
-                          </span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar className="w-4 h-4 text-white/50 flex-shrink-0" />
+                            <span className="text-white/70 truncate">
+                              Mes:{' '}
+                              {format(
+                                new Date(comprobante.facturas.año, comprobante.facturas.mes - 1, 1),
+                                'MMMM yyyy',
+                                { locale: es }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <DollarSign className="w-4 h-4 text-white/50 flex-shrink-0" />
+                            <span className="text-white/70">
+                              Monto: ${comprobante.monto.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm sm:col-span-2">
+                            <FileText className="w-4 h-4 text-white/50 flex-shrink-0" />
+                            <span className="text-white/70 truncate">{comprobante.nombre_archivo}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-sm sm:col-span-2">
+                            <Clock className="w-4 h-4 text-white/50 flex-shrink-0" />
+                            <span className="text-white/70">
+                              Subido:{' '}
+                              {format(parseISO(comprobante.fecha_subida), 'dd MMM yyyy HH:mm', {
+                                locale: es,
+                              })}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <DollarSign className="w-4 h-4 text-white/50" />
-                          <span className="text-white/70">
-                            Monto: ${comprobante.monto.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <FileText className="w-4 h-4 text-white/50" />
-                          <span className="text-white/70">{comprobante.nombre_archivo}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Clock className="w-4 h-4 text-white/50" />
-                          <span className="text-white/70">
-                            Subido:{' '}
-                            {format(parseISO(comprobante.fecha_subida), 'dd MMM yyyy HH:mm', {
-                              locale: es,
-                            })}
-                          </span>
-                        </div>
-                      </div>
 
                       <div className="mb-4">
                         <span
@@ -260,11 +278,11 @@ export default function ComprobantesPage() {
                                 })
                               }
                               placeholder="Explica por qué se rechaza el comprobante..."
-                              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm resize-none"
+                              className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm resize-none text-gray-900 bg-white"
                               rows={3}
                             />
                           </div>
-                          <div className="flex space-x-3">
+                          <div className="flex flex-col sm:flex-row gap-3">
                             <a
                               href={comprobante.archivo_url}
                               target="_blank"
@@ -308,6 +326,30 @@ export default function ComprobantesPage() {
                 </div>
               ))}
             </div>
+            
+            {/* Paginación */}
+            {totalPaginas > 1 && (
+              <div className="mt-6 flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => setPagina(p => Math.max(1, p - 1))}
+                  disabled={pagina === 1}
+                  className="px-4 py-2 bg-white/5 border border-white/10 text-white/70 rounded-xl hover:bg-white/10 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+                <span className="px-4 py-2 text-white/70 text-sm">
+                  Página {pagina} de {totalPaginas}
+                </span>
+                <button
+                  onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))}
+                  disabled={pagina === totalPaginas}
+                  className="px-4 py-2 bg-white/5 border border-white/10 text-white/70 rounded-xl hover:bg-white/10 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+          </>
           )}
         </div>
       </div>

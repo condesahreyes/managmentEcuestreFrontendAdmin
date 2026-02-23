@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import api from '@/lib/api';
-import { LogIn, Mail, Lock, Shield } from 'lucide-react';
-import Logo from '@/components/Logo';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import api from "@/lib/api";
+import { LogIn, Mail, Lock, Shield } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const { data } = await api.post('/auth/login', formData);
-      
-      if (!['admin', 'profesor'].includes(data.user.rol)) {
-        setError('No tienes permisos para acceder a este panel');
+      const { data } = await api.post("/auth/login", formData);
+
+      if (!["admin", "profesor"].includes(data.user.rol)) {
+        setError("No tienes permisos para acceder a este panel");
         return;
       }
 
       setAuth(data.user, data.token);
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      setError(err.response?.data?.error || "Error al iniciar sesión");
     } finally {
       setLoading(false);
     }
@@ -44,10 +44,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-[#111111] border border-white/10 rounded-3xl shadow-2xl p-8 space-y-6 relative overflow-hidden backdrop-blur-xl">
           <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-radial from-white/5 to-transparent pointer-events-none"></div>
-          
+
           <div className="text-center space-y-4 relative z-10">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 border border-white/20 rounded-2xl mb-4 backdrop-blur-sm">
-              <Logo className="w-12 h-12 text-white" />
+              <Logo className="w-20 h-20  text-white rounded-2xl" />
             </div>
             <div>
               <h1 className="font-serif text-3xl font-medium text-white mb-1">
@@ -79,7 +79,9 @@ export default function LoginPage() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all backdrop-blur-sm"
                   placeholder="admin@santabarbara.com"
                 />
@@ -96,7 +98,9 @@ export default function LoginPage() {
                   type="password"
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all backdrop-blur-sm"
                   placeholder="••••••••"
                 />

@@ -50,6 +50,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [date, setDate] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     loadAgenda();
@@ -135,10 +145,10 @@ export default function DashboardPage() {
             <h1 className="font-serif text-3xl font-medium text-white">Agenda General</h1>
             <p className="text-white/60 mt-1">Vista completa de todas las clases programadas</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setView('month')}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm sm:text-base ${
                 view === 'month'
                   ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
                   : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
@@ -148,7 +158,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setView('week')}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm sm:text-base ${
                 view === 'week'
                   ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
                   : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
@@ -158,7 +168,7 @@ export default function DashboardPage() {
             </button>
             <button
               onClick={() => setView('day')}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm sm:text-base ${
                 view === 'day'
                   ? 'bg-white text-[#0a0a0a] shadow-lg shadow-white/10'
                   : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
@@ -170,26 +180,30 @@ export default function DashboardPage() {
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6 overflow-hidden">
-          <BigCalendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            view={view}
-            onView={setView}
-            date={date}
-            onNavigate={setDate}
-            eventPropGetter={eventStyleGetter}
-            style={{ height: 600 }}
-            messages={{
-              next: 'Siguiente',
-              previous: 'Anterior',
-              today: 'Hoy',
-              month: 'Mes',
-              week: 'Semana',
-              day: 'Día',
-            }}
-          />
+          <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+            <div style={{ minWidth: isMobile ? '100%' : '600px' }}>
+              <BigCalendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                view={view}
+                onView={setView}
+                date={date}
+                onNavigate={setDate}
+                eventPropGetter={eventStyleGetter}
+                style={{ height: isMobile ? 400 : 600 }}
+                messages={{
+                  next: 'Siguiente',
+                  previous: 'Anterior',
+                  today: 'Hoy',
+                  month: 'Mes',
+                  week: 'Semana',
+                  day: 'Día',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">

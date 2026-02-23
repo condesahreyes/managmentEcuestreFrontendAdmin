@@ -75,17 +75,32 @@ select:focus {
 
 /* React Big Calendar styles */
 .rbc-calendar {
-  min-height: 600px;
+  min-height: 400px;
   background: var(--surface-2);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   border: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .rbc-calendar {
+    min-height: 600px;
+    padding: 16px;
+  }
 }
 
 .rbc-header {
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
-  padding: 12px 0;
+  padding: 8px 4px;
+  font-size: 12px;
+}
+
+@media (min-width: 768px) {
+  .rbc-header {
+    padding: 12px 0;
+    font-size: 14px;
+  }
 }
 
 .rbc-today {
