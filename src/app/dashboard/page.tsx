@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Layout from '@/components/Layout';
 import api from '@/lib/api';
-import { Calendar, Clock, User, Zap } from 'lucide-react';
+import { Calendar, Clock, User, Zap, DollarSign, Loader2 } from 'lucide-react';
 import { Calendar as BigCalendar } from 'react-big-calendar';
 import { dateFnsLocalizer } from 'react-big-calendar';
 import { format, parseISO, startOfWeek, getDay, addDays } from 'date-fns';
@@ -51,6 +51,8 @@ export default function DashboardPage() {
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
   const [date, setDate] = useState(new Date());
   const [isMobile, setIsMobile] = useState(false);
+  const [generandoFacturas, setGenerandoFacturas] = useState(false);
+  const [mensajeFacturas, setMensajeFacturas] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -82,6 +84,34 @@ export default function DashboardPage() {
       console.error('Error al cargar agenda:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerarFacturas = async () => {
+    if (!confirm('¿Deseas generar facturas mensuales para todas las suscripciones indefinidas (pensión/media pensión)?')) {
+      return;
+    }
+
+    setGenerandoFacturas(true);
+    setMensajeFacturas(null);
+
+    try {
+      const { data } = await api.post('/facturas/generar-mensuales');
+      setMensajeFacturas({
+        tipo: 'success',
+        texto: `Se generaron ${data.facturasCreadas} facturas exitosamente.${data.errores?.length > 0 ? ` Hubo ${data.errores.length} errores.` : ''}`,
+      });
+      if (data.errores && data.errores.length > 0) {
+        console.warn('Errores al generar facturas:', data.errores);
+      }
+    } catch (error: any) {
+      setMensajeFacturas({
+        tipo: 'error',
+        texto: error.response?.data?.error || 'Error al generar facturas',
+      });
+    } finally {
+      setGenerandoFacturas(false);
+      setTimeout(() => setMensajeFacturas(null), 5000);
     }
   };
 
@@ -140,12 +170,47 @@ export default function DashboardPage() {
   return (
     <Layout>
       <div className="space-y-6">
+        {mensajeFacturas && (
+          <div
+            className={`rounded-2xl p-4 flex items-center space-x-3 backdrop-blur-xl ${
+              mensajeFacturas.tipo === 'success'
+                ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+                : 'bg-red-500/10 border border-red-500/20 text-red-400'
+            }`}
+          >
+            {mensajeFacturas.tipo === 'success' ? (
+              <DollarSign className="w-5 h-5" />
+            ) : (
+              <Loader2 className="w-5 h-5" />
+            )}
+            <span className="text-sm">{mensajeFacturas.texto}</span>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl font-medium text-white">Agenda General</h1>
             <p className="text-white/60 mt-1">Vista completa de todas las clases programadas</p>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
+            <button
+              onClick={handleGenerarFacturas}
+              disabled={generandoFacturas}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white hover:bg-white/20 border border-white/20 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Generar facturas mensuales para suscripciones indefinidas (pensión/media pensión)"
+            >
+              {generandoFacturas ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="hidden sm:inline">Generando...</span>
+                </>
+              ) : (
+                <>
+                  <DollarSign className="w-4 h-4" />
+                  <span className="hidden sm:inline">Generar Facturas</span>
+                </>
+              )}
+            </button>
             <button
               onClick={() => setView('month')}
               className={`px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm sm:text-base ${

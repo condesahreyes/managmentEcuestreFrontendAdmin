@@ -1,9 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Layout from '@/components/Layout';
-import api from '@/lib/api';
-import { User, Plus, Edit, Trash2, X, Mail, Phone, Clock, Eye } from 'lucide-react';
+import { useEffect, useState } from "react";
+import Layout from "@/components/Layout";
+import api from "@/lib/api";
+import {
+  User,
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Mail,
+  Phone,
+  Clock,
+  Eye,
+} from "lucide-react";
 
 interface Profesor {
   id: string;
@@ -16,31 +26,41 @@ interface Profesor {
     telefono: string;
     activo: boolean;
   };
+  porcentaje_escuelita: number;
+  porcentaje_pension: number;
 }
 
 export default function ProfesoresPage() {
   const [profesores, setProfesores] = useState<Profesor[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [profesorEditando, setProfesorEditando] = useState<Profesor | null>(null);
+  const [profesorEditando, setProfesorEditando] = useState<Profesor | null>(
+    null,
+  );
   const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+    porcentaje_escuelita: 0,
+    porcentaje_pension: 0,
   });
-  const [horarios, setHorarios] = useState<Array<{
-    dia_semana: number;
-    hora_inicio: string;
-    hora_fin: string;
-  }>>([]);
+  const [horarios, setHorarios] = useState<
+    Array<{
+      dia_semana: number;
+      hora_inicio: string;
+      hora_fin: string;
+    }>
+  >([]);
   const [profesorDetalle, setProfesorDetalle] = useState<Profesor | null>(null);
-  const [horariosDetalle, setHorariosDetalle] = useState<Array<{
-    dia_semana: number;
-    hora_inicio: string;
-    hora_fin: string;
-    activo: boolean;
-  }>>([]);
+  const [horariosDetalle, setHorariosDetalle] = useState<
+    Array<{
+      dia_semana: number;
+      hora_inicio: string;
+      hora_fin: string;
+      activo: boolean;
+    }>
+  >([]);
 
   useEffect(() => {
     loadProfesores();
@@ -48,10 +68,10 @@ export default function ProfesoresPage() {
 
   const loadProfesores = async () => {
     try {
-      const { data } = await api.get('/admin/profesores');
+      const { data } = await api.get("/admin/profesores");
       setProfesores(data || []);
     } catch (error) {
-      console.error('Error al cargar profesores:', error);
+      console.error("Error al cargar profesores:", error);
     } finally {
       setLoading(false);
     }
@@ -67,58 +87,80 @@ export default function ProfesoresPage() {
           apellido: formData.apellido,
           telefono: formData.telefono,
           horarios: horarios,
+          porcentaje_escuelita: formData.porcentaje_escuelita,
+          porcentaje_pension: formData.porcentaje_pension,
         });
         setMostrarFormulario(false);
         setProfesorEditando(null);
-        setFormData({ nombre: '', apellido: '', email: '', telefono: '' });
+        setFormData({
+          nombre: "",
+          apellido: "",
+          email: "",
+          telefono: "",
+          porcentaje_escuelita: 0,
+          porcentaje_pension: 0,
+        });
         setHorarios([]);
         loadProfesores();
-        alert('Profesor actualizado exitosamente');
+        alert("Profesor actualizado exitosamente");
       } else {
         // Crear nuevo profesor
-        const { data } = await api.post('/admin/profesores', {
+        const { data } = await api.post("/admin/profesores", {
           ...formData,
           horarios: horarios,
         });
         setMostrarFormulario(false);
-        setFormData({ nombre: '', apellido: '', email: '', telefono: '' });
+        setFormData({
+          nombre: "",
+          apellido: "",
+          email: "",
+          telefono: "",
+          porcentaje_escuelita: 0,
+          porcentaje_pension: 0,
+        });
         setHorarios([]);
         loadProfesores();
         alert(
           `Profesor creado exitosamente.\n\n` +
-          `Email: ${formData.email}\n` +
-          `Contraseña por defecto: ${data.password || '123456'}\n\n` +
-          `El profesor puede cambiar su contraseña desde su perfil.`
+            `Email: ${formData.email}\n` +
+            `Contraseña por defecto: ${data.password || "123456"}\n\n` +
+            `El profesor puede cambiar su contraseña desde su perfil.`,
         );
       }
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Error al guardar profesor');
+      alert(error.response?.data?.error || "Error al guardar profesor");
     }
   };
 
   const handleEditar = async (profesor: Profesor) => {
     try {
       // Cargar horarios del profesor
-      const { data: horariosData } = await api.get(`/admin/profesores/${profesor.id}/horarios`);
-      
+      const { data: horariosData } = await api.get(
+        `/admin/profesores/${profesor.id}/horarios`,
+      );
+      console.log(profesor?.porcentaje_escuelita);
       setProfesorEditando(profesor);
       setFormData({
-        nombre: profesor.users?.nombre || '',
-        apellido: profesor.users?.apellido || '',
-        email: profesor.users?.email || '',
-        telefono: profesor.users?.telefono || '',
+        nombre: profesor.users?.nombre || "",
+        apellido: profesor.users?.apellido || "",
+        email: profesor.users?.email || "",
+        telefono: profesor.users?.telefono || "",
+        porcentaje_escuelita: profesor?.porcentaje_escuelita || 0,
+        porcentaje_pension: profesor?.porcentaje_pension || 0,
       });
       setHorarios(horariosData || []);
       setMostrarFormulario(true);
     } catch (error: any) {
-      console.error('Error al cargar datos del profesor:', error);
+      console.error("Error al cargar datos del profesor:", error);
       // Si falla cargar horarios, continuar con la edición sin ellos
       setProfesorEditando(profesor);
       setFormData({
-        nombre: profesor.users?.nombre || '',
-        apellido: profesor.users?.apellido || '',
-        email: profesor.users?.email || '',
-        telefono: profesor.users?.telefono || '',
+        nombre: profesor.users?.nombre || "",
+        apellido: profesor.users?.apellido || "",
+        email: profesor.users?.email || "",
+        telefono: profesor.users?.telefono || "",
+        porcentaje_escuelita: profesor?.porcentaje_escuelita || 0,
+        porcentaje_pension: profesor?.porcentaje_pension || 0,
       });
       setHorarios([]);
       setMostrarFormulario(true);
@@ -126,7 +168,10 @@ export default function ProfesoresPage() {
   };
 
   const agregarHorario = () => {
-    setHorarios([...horarios, { dia_semana: 1, hora_inicio: '09:00', hora_fin: '10:00' }]);
+    setHorarios([
+      ...horarios,
+      { dia_semana: 1, hora_inicio: "09:00", hora_fin: "10:00" },
+    ]);
   };
 
   const eliminarHorario = (index: number) => {
@@ -140,23 +185,23 @@ export default function ProfesoresPage() {
   };
 
   const diasSemana = [
-    { valor: 0, nombre: 'Domingo' },
-    { valor: 1, nombre: 'Lunes' },
-    { valor: 2, nombre: 'Martes' },
-    { valor: 3, nombre: 'Miércoles' },
-    { valor: 4, nombre: 'Jueves' },
-    { valor: 5, nombre: 'Viernes' },
-    { valor: 6, nombre: 'Sábado' },
+    { valor: 0, nombre: "Domingo" },
+    { valor: 1, nombre: "Lunes" },
+    { valor: 2, nombre: "Martes" },
+    { valor: 3, nombre: "Miércoles" },
+    { valor: 4, nombre: "Jueves" },
+    { valor: 5, nombre: "Viernes" },
+    { valor: 6, nombre: "Sábado" },
   ];
 
   const handleEliminar = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este profesor?')) return;
+    if (!confirm("¿Estás seguro de que deseas eliminar este profesor?")) return;
 
     try {
       await api.delete(`/admin/profesores/${id}`);
       loadProfesores();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Error al eliminar profesor');
+      alert(error.response?.data?.error || "Error al eliminar profesor");
     }
   };
 
@@ -167,18 +212,20 @@ export default function ProfesoresPage() {
       });
       loadProfesores();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Error al actualizar estado');
+      alert(error.response?.data?.error || "Error al actualizar estado");
     }
   };
 
   const handleVerDetalle = async (profesor: Profesor) => {
     try {
       // Cargar horarios del profesor
-      const { data: horariosData } = await api.get(`/admin/profesores/${profesor.id}/horarios`);
+      const { data: horariosData } = await api.get(
+        `/admin/profesores/${profesor.id}/horarios`,
+      );
       setHorariosDetalle(horariosData || []);
       setProfesorDetalle(profesor);
     } catch (error: any) {
-      console.error('Error al cargar detalles del profesor:', error);
+      console.error("Error al cargar detalles del profesor:", error);
       // Si falla cargar horarios, mostrar solo la info básica
       setHorariosDetalle([]);
       setProfesorDetalle(profesor);
@@ -200,13 +247,24 @@ export default function ProfesoresPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-serif text-3xl font-medium text-white">Profesores</h1>
-            <p className="text-white/60 mt-1">Gestiona los profesores del centro</p>
+            <h1 className="font-serif text-3xl font-medium text-white">
+              Profesores
+            </h1>
+            <p className="text-white/60 mt-1">
+              Gestiona los profesores del centro
+            </p>
           </div>
           <button
             onClick={() => {
               setProfesorEditando(null);
-              setFormData({ nombre: '', apellido: '', email: '', telefono: '' });
+              setFormData({
+                nombre: "",
+                apellido: "",
+                email: "",
+                telefono: "",
+                porcentaje_escuelita: 0,
+                porcentaje_pension: 0,
+              });
               setHorarios([]);
               setMostrarFormulario(true);
             }}
@@ -221,7 +279,7 @@ export default function ProfesoresPage() {
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-serif text-xl font-medium text-white">
-                {profesorEditando ? 'Editar Profesor' : 'Nuevo Profesor'}
+                {profesorEditando ? "Editar Profesor" : "Nuevo Profesor"}
               </h2>
               <button
                 onClick={() => {
@@ -237,44 +295,95 @@ export default function ProfesoresPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Nombre</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Nombre
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nombre: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Apellido</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Apellido
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.apellido}
-                    onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, apellido: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Porcentaje de pago (escuelita)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.porcentaje_escuelita}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        porcentaje_escuelita: parseFloat(e.target.value),
+                      })
+                    }
+                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Porcentaje de pago (pensión)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.porcentaje_pension}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        porcentaje_pension: parseFloat(e.target.value),
+                      })
+                    }
                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                   />
                 </div>
               </div>
               {!profesorEditando && (
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Email
+                  </label>
                   <input
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                   />
                   <p className="text-xs text-white/50 mt-1">
-                    Se enviará un email para que el profesor configure su contraseña
+                    Se enviará un email para que el profesor configure su
+                    contraseña
                   </p>
                 </div>
               )}
               {profesorEditando && (
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">Email</label>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    Email
+                  </label>
                   <input
                     type="email"
                     disabled
@@ -293,14 +402,18 @@ export default function ProfesoresPage() {
                 <input
                   type="tel"
                   value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, telefono: e.target.value })
+                  }
                   className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium text-white/70">Horarios de Disponibilidad</label>
+                  <label className="block text-sm font-medium text-white/70">
+                    Horarios de Disponibilidad
+                  </label>
                   <button
                     type="button"
                     onClick={agregarHorario}
@@ -311,13 +424,21 @@ export default function ProfesoresPage() {
                   </button>
                 </div>
                 {horarios.length === 0 ? (
-                  <p className="text-xs text-white/50 italic">No hay horarios definidos. El profesor estará disponible en todos los horarios.</p>
+                  <p className="text-xs text-white/50 italic">
+                    No hay horarios definidos. El profesor estará disponible en
+                    todos los horarios.
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {horarios.map((horario, index) => (
-                      <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                      <div
+                        key={index}
+                        className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3"
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-white/70">Horario {index + 1}</span>
+                          <span className="text-sm font-medium text-white/70">
+                            Horario {index + 1}
+                          </span>
                           <button
                             type="button"
                             onClick={() => eliminarHorario(index)}
@@ -328,34 +449,62 @@ export default function ProfesoresPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-white/60 mb-1">Día</label>
+                            <label className="block text-xs font-medium text-white/60 mb-1">
+                              Día
+                            </label>
                             <select
                               value={horario.dia_semana}
-                              onChange={(e) => actualizarHorario(index, 'dia_semana', parseInt(e.target.value))}
+                              onChange={(e) =>
+                                actualizarHorario(
+                                  index,
+                                  "dia_semana",
+                                  parseInt(e.target.value),
+                                )
+                              }
                               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                             >
                               {diasSemana.map((dia) => (
-                                <option key={dia.valor} value={dia.valor} className="bg-[#1a1a1a]">
+                                <option
+                                  key={dia.valor}
+                                  value={dia.valor}
+                                  className="bg-[#1a1a1a]"
+                                >
                                   {dia.nombre}
                                 </option>
                               ))}
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-white/60 mb-1">Hora Inicio</label>
+                            <label className="block text-xs font-medium text-white/60 mb-1">
+                              Hora Inicio
+                            </label>
                             <input
                               type="time"
                               value={horario.hora_inicio}
-                              onChange={(e) => actualizarHorario(index, 'hora_inicio', e.target.value)}
+                              onChange={(e) =>
+                                actualizarHorario(
+                                  index,
+                                  "hora_inicio",
+                                  e.target.value,
+                                )
+                              }
                               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-white/60 mb-1">Hora Fin</label>
+                            <label className="block text-xs font-medium text-white/60 mb-1">
+                              Hora Fin
+                            </label>
                             <input
                               type="time"
                               value={horario.hora_fin}
-                              onChange={(e) => actualizarHorario(index, 'hora_fin', e.target.value)}
+                              onChange={(e) =>
+                                actualizarHorario(
+                                  index,
+                                  "hora_fin",
+                                  e.target.value,
+                                )
+                              }
                               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
                             />
                           </div>
@@ -371,7 +520,7 @@ export default function ProfesoresPage() {
                   type="submit"
                   className="flex-1 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-xl hover:bg-white/90 transition-all font-semibold shadow-lg shadow-white/10"
                 >
-                  {profesorEditando ? 'Actualizar Profesor' : 'Crear Profesor'}
+                  {profesorEditando ? "Actualizar Profesor" : "Crear Profesor"}
                 </button>
                 <button
                   type="button"
@@ -410,7 +559,10 @@ export default function ProfesoresPage() {
               </thead>
               <tbody className="bg-white/5 divide-y divide-white/10">
                 {profesores.map((profesor) => (
-                  <tr key={profesor.id} className="hover:bg-white/5 transition-colors">
+                  <tr
+                    key={profesor.id}
+                    className="hover:bg-white/5 transition-colors"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-white">
                         {profesor.users?.nombre} {profesor.users?.apellido}
@@ -437,11 +589,13 @@ export default function ProfesoresPage() {
                       <span
                         className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
                           profesor.activo && profesor.users?.activo
-                            ? 'bg-white/10 text-white border border-white/20'
-                            : 'bg-red-500/20 text-red-400 border border-red-500/20'
+                            ? "bg-white/10 text-white border border-white/20"
+                            : "bg-red-500/20 text-red-400 border border-red-500/20"
                         }`}
                       >
-                        {profesor.activo && profesor.users?.activo ? 'Activo' : 'Inactivo'}
+                        {profesor.activo && profesor.users?.activo
+                          ? "Activo"
+                          : "Inactivo"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -464,11 +618,13 @@ export default function ProfesoresPage() {
                           onClick={() => handleToggleActivo(profesor)}
                           className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
                             profesor.activo && profesor.users?.activo
-                              ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20'
-                              : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                              ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
+                              : "bg-white/10 text-white hover:bg-white/20 border border-white/20"
                           }`}
                         >
-                          {profesor.activo && profesor.users?.activo ? 'Desactivar' : 'Activar'}
+                          {profesor.activo && profesor.users?.activo
+                            ? "Desactivar"
+                            : "Activar"}
                         </button>
                         <button
                           onClick={() => handleEliminar(profesor.id)}
@@ -493,7 +649,8 @@ export default function ProfesoresPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="font-serif text-2xl font-medium text-white">
-                    {profesorDetalle.users?.nombre} {profesorDetalle.users?.apellido}
+                    {profesorDetalle.users?.nombre}{" "}
+                    {profesorDetalle.users?.apellido}
                   </h2>
                   <p className="text-white/60 mt-1">Detalles del Profesor</p>
                 </div>
@@ -517,19 +674,45 @@ export default function ProfesoresPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-medium text-white/50 mb-1">Nombre</p>
-                      <p className="text-white">{profesorDetalle.users?.nombre}</p>
+                      <p className="text-xs font-medium text-white/50 mb-1">
+                        Nombre
+                      </p>
+                      <p className="text-white">
+                        {profesorDetalle.users?.nombre}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-white/50 mb-1">Apellido</p>
-                      <p className="text-white">{profesorDetalle.users?.apellido}</p>
+                      <p className="text-xs font-medium text-white/50 mb-1">
+                        Apellido
+                      </p>
+                      <p className="text-white">
+                        {profesorDetalle.users?.apellido}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">
+                        Porcentaje de escuelita
+                      </p>
+                      <p className="text-white">
+                        {profesorDetalle?.porcentaje_escuelita | 0}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-white/50 mb-1">
+                        Porcentaje de pensión
+                      </p>
+                      <p className="text-white">
+                        {profesorDetalle?.porcentaje_pension | 0}%
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs font-medium text-white/50 mb-1 flex items-center space-x-1">
                         <Mail className="w-3 h-3" />
                         <span>Email</span>
                       </p>
-                      <p className="text-white">{profesorDetalle.users?.email}</p>
+                      <p className="text-white">
+                        {profesorDetalle.users?.email}
+                      </p>
                     </div>
                     {profesorDetalle.users?.telefono && (
                       <div>
@@ -537,19 +720,26 @@ export default function ProfesoresPage() {
                           <Phone className="w-3 h-3" />
                           <span>Teléfono</span>
                         </p>
-                        <p className="text-white">{profesorDetalle.users?.telefono}</p>
+                        <p className="text-white">
+                          {profesorDetalle.users?.telefono}
+                        </p>
                       </div>
                     )}
                     <div>
-                      <p className="text-xs font-medium text-white/50 mb-1">Estado</p>
+                      <p className="text-xs font-medium text-white/50 mb-1">
+                        Estado
+                      </p>
                       <span
                         className={`inline-block px-2.5 py-1 text-xs font-medium rounded-lg ${
-                          profesorDetalle.activo && profesorDetalle.users?.activo
-                            ? 'bg-white/10 text-white border border-white/20'
-                            : 'bg-red-500/20 text-red-400 border border-red-500/20'
+                          profesorDetalle.activo &&
+                          profesorDetalle.users?.activo
+                            ? "bg-white/10 text-white border border-white/20"
+                            : "bg-red-500/20 text-red-400 border border-red-500/20"
                         }`}
                       >
-                        {profesorDetalle.activo && profesorDetalle.users?.activo ? 'Activo' : 'Inactivo'}
+                        {profesorDetalle.activo && profesorDetalle.users?.activo
+                          ? "Activo"
+                          : "Inactivo"}
                       </span>
                     </div>
                   </div>
@@ -563,7 +753,8 @@ export default function ProfesoresPage() {
                   </h3>
                   {horariosDetalle.length === 0 ? (
                     <p className="text-sm text-white/50 italic">
-                      No hay horarios definidos. El profesor está disponible en todos los horarios.
+                      No hay horarios definidos. El profesor está disponible en
+                      todos los horarios.
                     </p>
                   ) : (
                     <div className="space-y-3">
@@ -576,17 +767,27 @@ export default function ProfesoresPage() {
                           >
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                               <div>
-                                <p className="text-xs font-medium text-white/50 mb-1">Día</p>
+                                <p className="text-xs font-medium text-white/50 mb-1">
+                                  Día
+                                </p>
                                 <p className="text-white">
-                                  {diasSemana.find((d) => d.valor === horario.dia_semana)?.nombre || 'N/A'}
+                                  {diasSemana.find(
+                                    (d) => d.valor === horario.dia_semana,
+                                  )?.nombre || "N/A"}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-white/50 mb-1">Hora Inicio</p>
-                                <p className="text-white">{horario.hora_inicio}</p>
+                                <p className="text-xs font-medium text-white/50 mb-1">
+                                  Hora Inicio
+                                </p>
+                                <p className="text-white">
+                                  {horario.hora_inicio}
+                                </p>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-white/50 mb-1">Hora Fin</p>
+                                <p className="text-xs font-medium text-white/50 mb-1">
+                                  Hora Fin
+                                </p>
                                 <p className="text-white">{horario.hora_fin}</p>
                               </div>
                             </div>

@@ -14,6 +14,7 @@ import {
   FileText,
   Menu,
   X,
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import Logo from "./Logo";
@@ -39,6 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           { href: "/alumnos", icon: Users, label: "Alumnos" },
           { href: "/caballos", icon: Logo, label: "Caballos" },
           { href: "/profesores", icon: Users, label: "Profesores" },
+          { href: "/pagos-profesores", icon: DollarSign, label: "Pagos Profesores" },
           { href: "/planes", icon: Package, label: "Planes" },
           { href: "/comprobantes", icon: FileText, label: "Comprobantes" },
         ]
