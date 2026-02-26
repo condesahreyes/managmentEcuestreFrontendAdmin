@@ -20,6 +20,13 @@ interface Caballo {
     apellido: string;
     email: string;
   };
+  dueno_id2?: string;
+  dueno2?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+  };
 }
 
 interface Dueno {
@@ -41,6 +48,7 @@ export default function CaballosPage() {
     estado: 'activo',
     limite_clases_dia: 3,
     dueno_id: '',
+    dueno_id2: '',
   });
   const [caballoDetalle, setCaballoDetalle] = useState<Caballo | null>(null);
 
@@ -75,6 +83,7 @@ export default function CaballosPage() {
       const submitData = { ...formData };
       if (submitData.tipo === 'escuela') {
         submitData.dueno_id = '';
+        submitData.dueno_id2 = '';
       }
       if (caballoEditando) {
         await api.patch(`/admin/caballos/${caballoEditando.id}`, submitData);
@@ -83,7 +92,7 @@ export default function CaballosPage() {
       }
       setMostrarFormulario(false);
       setCaballoEditando(null);
-      setFormData({ nombre: '', tipo: 'escuela', estado: 'activo', limite_clases_dia: 3, dueno_id: '' });
+      setFormData({ nombre: '', tipo: 'escuela', estado: 'activo', limite_clases_dia: 3, dueno_id: '', dueno_id2: '' });
       loadCaballos();
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error al guardar caballo');
@@ -98,6 +107,7 @@ export default function CaballosPage() {
       estado: caballo.estado,
       limite_clases_dia: caballo.limite_clases_dia,
       dueno_id: caballo.dueno_id || '',
+      dueno_id2: caballo.dueno_id2 || '',
     });
     setMostrarFormulario(true);
   };
@@ -176,7 +186,7 @@ export default function CaballosPage() {
           <button
             onClick={() => {
               setCaballoEditando(null);
-              setFormData({ nombre: '', tipo: 'escuela', estado: 'activo', limite_clases_dia: 3, dueno_id: '' });
+              setFormData({ nombre: '', tipo: 'escuela', estado: 'activo', limite_clases_dia: 3, dueno_id: '', dueno_id2: '' });
               setMostrarFormulario(true);
             }}
             className="flex items-center space-x-2 px-4 py-2.5 bg-white text-[#0a0a0a] rounded-xl hover:bg-white/90 transition-all font-semibold shadow-lg shadow-white/10"
@@ -248,29 +258,48 @@ export default function CaballosPage() {
                 </div>
               </div>
               {formData.tipo === 'privado' && (
-                <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">
-                    Dueño <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.dueno_id}
-                    onChange={(e) => setFormData({ ...formData, dueno_id: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
-                  >
-                    <option value="" className="bg-[#1a1a1a]">Selecciona un dueño</option>
-                    {duenos.map((dueno) => (
-                      <option key={dueno.id} value={dueno.id} className="bg-[#1a1a1a]">
-                        {dueno.nombre} {dueno.apellido} ({dueno.email})
-                      </option>
-                    ))}
-                  </select>
-                  {duenos.length === 0 && (
-                    <p className="text-xs text-white/50 mt-1">
-                      No hay alumnos de pensión disponibles. Crea alumnos de pensión completa o media pensión primero.
-                    </p>
-                  )}
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      Dueño Principal <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      required
+                      value={formData.dueno_id}
+                      onChange={(e) => setFormData({ ...formData, dueno_id: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
+                    >
+                      <option value="" className="bg-[#1a1a1a]">Selecciona un dueño</option>
+                      {duenos.map((dueno) => (
+                        <option key={dueno.id} value={dueno.id} className="bg-[#1a1a1a]">
+                          {dueno.nombre} {dueno.apellido} ({dueno.email})
+                        </option>
+                      ))}
+                    </select>
+                    {duenos.length === 0 && (
+                      <p className="text-xs text-white/50 mt-1">
+                        No hay alumnos de pensión disponibles. Crea alumnos de pensión completa o media pensión primero.
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      Segundo Dueño (opcional)
+                    </label>
+                    <select
+                      value={formData.dueno_id2}
+                      onChange={(e) => setFormData({ ...formData, dueno_id2: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 focus:bg-white/10 backdrop-blur-sm"
+                    >
+                      <option value="" className="bg-[#1a1a1a]">Sin segundo dueño</option>
+                      {duenos.map((dueno) => (
+                        <option key={dueno.id} value={dueno.id} className="bg-[#1a1a1a]">
+                          {dueno.nombre} {dueno.apellido} ({dueno.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
               )}
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">
@@ -344,15 +373,16 @@ export default function CaballosPage() {
                       {caballo.limite_clases_dia} clases
                     </span>
                   </div>
-                  {caballo.tipo === 'privado' && caballo.dueno && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <User className="w-4 h-4 text-white/50" />
-                      <span className="text-white/60">Dueño:</span>
-                      <span className="font-medium text-white">
-                        {caballo.dueno.nombre} {caballo.dueno.apellido}
-                      </span>
-                    </div>
-                  )}
+                    {caballo.tipo === 'privado' && (caballo.dueno || caballo.dueno2) && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <User className="w-4 h-4 text-white/50" />
+                        <span className="text-white/60">Dueños:</span>
+                        <span className="font-medium text-white">
+                          {caballo.dueno ? `${caballo.dueno.nombre} ${caballo.dueno.apellido}` : ''}
+                          {caballo.dueno2 ? ` / ${caballo.dueno2.nombre} ${caballo.dueno2.apellido}` : ''}
+                        </span>
+                      </div>
+                    )}
                 </div>
 
                 <div className="border-t border-white/10 pt-4 space-y-3">
@@ -479,17 +509,29 @@ export default function CaballosPage() {
                         {caballoDetalle.limite_clases_dia} clases
                       </p>
                     </div>
-                    {caballoDetalle.tipo === 'privado' && caballoDetalle.dueno && (
+                    {caballoDetalle.tipo === 'privado' && (caballoDetalle.dueno || caballoDetalle.dueno2) && (
                       <div className="md:col-span-2">
                         <p className="text-xs font-medium text-white/50 mb-1 flex items-center space-x-1">
                           <User className="w-3 h-3" />
-                          <span>Dueño</span>
+                          <span>Dueños</span>
                         </p>
                         <div className="mt-1">
-                          <p className="text-white text-sm md:text-base">
-                            {caballoDetalle.dueno.nombre} {caballoDetalle.dueno.apellido}
-                          </p>
-                          <p className="text-white/60 text-xs mt-0.5">{caballoDetalle.dueno.email}</p>
+                          {caballoDetalle.dueno && (
+                            <>
+                              <p className="text-white text-sm md:text-base">
+                                {caballoDetalle.dueno.nombre} {caballoDetalle.dueno.apellido}
+                              </p>
+                              <p className="text-white/60 text-xs mt-0.5">{caballoDetalle.dueno.email}</p>
+                            </>
+                          )}
+                          {caballoDetalle.dueno2 && (
+                            <>
+                              <p className="text-white text-sm md:text-base">
+                                {caballoDetalle.dueno2.nombre} {caballoDetalle.dueno2.apellido}
+                              </p>
+                              <p className="text-white/60 text-xs mt-0.5">{caballoDetalle.dueno2.email}</p>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
